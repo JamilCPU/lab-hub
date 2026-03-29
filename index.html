@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>THE LAB — Control Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=JetBrains+Mono:wght@400;500;700&family=Creepster&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060809;
+    --surface: #0c1014;
+    --surface2: #111820;
+    --border: #1a2530;
+    --border-glow: #2a4a3a;
+    --text: #b8c8b0;
+    --muted: #3a5040;
+    --acid: #39ff14;
+    --acid-dim: rgba(57,255,20,0.08);
+    --acid-mid: rgba(57,255,20,0.15);
+    --amber: #ffb000;
+    --amber-dim: rgba(255,176,0,0.1);
+    --red: #ff3030;
+    --red-dim: rgba(255,48,48,0.1);
+    --mono: 'JetBrains Mono', 'Share Tech Mono', monospace;
+    --display: 'Special Elite', serif;
+    --horror: 'Creepster', cursive;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scrollbar-width: thin; scrollbar-color: #1a2530 #060809; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Noise + scanline overlay ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.08) 2px,
+        rgba(0,0,0,0.08) 4px
+      );
+    pointer-events: none;
+    z-index: 1000;
+    animation: scanroll 8s linear infinite;
+  }
+
+  @keyframes scanroll {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 100px; }
+  }
+
+  /* ── Bubbling background ── */
+  .bubbles {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .bubble {
+    position: absolute;
+    bottom: -60px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--acid);
+    opacity: 0;
+    animation: bubble-rise var(--dur) ease-in infinite;
+    animation-delay: var(--delay);
+    left: var(--left);
+  }
+
+  .bubble::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid rgba(57,255,20,0.3);
+  }
+
+  @keyframes bubble-rise {
+    0% { opacity: 0; transform: translateY(0) scale(1); }
+    10% { opacity: 0.6; }
+    80% { opacity: 0.2; }
+    100% { opacity: 0; transform: translateY(-100vh) scale(0.3); }
+  }
+
+  /* ── Header ── */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(6,8,9,0.96);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    backdrop-filter: blur(12px);
+  }
+
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--acid), var(--amber), transparent);
+    opacity: 0.4;
+    animation: scan-line 4s ease-in-out infinite;
+  }
+
+  @keyframes scan-line {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 0.6; }
+  }
+
+  .logo {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+  }
+
+  .logo-main {
+    font-family: var(--horror);
+    font-size: 28px;
+    color: var(--acid);
+    letter-spacing: 0.15em;
+    text-shadow: 0 0 20px rgba(57,255,20,0.5), 0 0 40px rgba(57,255,20,0.2);
+    animation: flicker 6s infinite;
+  }
+
+  @keyframes flicker {
+    0%, 95%, 100% { opacity: 1; }
+    96% { opacity: 0.6; }
+    97% { opacity: 1; }
+    98% { opacity: 0.4; }
+    99% { opacity: 1; }
+  }
+
+  .logo-sub {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .header-meta {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
+
+  .meta-label {
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .meta-value {
+    font-size: 12px;
+    color: var(--acid);
+    font-weight: 500;
+  }
+
+  #clock {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--acid);
+    text-shadow: 0 0 10px rgba(57,255,20,0.4);
+    letter-spacing: 0.05em;
+  }
+
+  .header-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .status-count {
+    font-size: 11px;
+    color: var(--acid);
+    font-weight: 700;
+  }
+
+  /* ── Warning tape ── */
+  .warning-tape {
+    height: 6px;
+    background: repeating-linear-gradient(
+      45deg,
+      var(--amber),
+      var(--amber) 12px,
+      #1a1200 12px,
+      #1a1200 24px
+    );
+    opacity: 0.7;
+  }
+
+  /* ── Main layout ── */
+  main {
+    position: relative;
+    z-index: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+  }
+
+  /* ── Section ── */
+  .section {
+    margin-bottom: 3.5rem;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-index {
+    font-family: var(--horror);
+    font-size: 40px;
+    color: var(--acid);
+    opacity: 0.15;
+    line-height: 1;
+    min-width: 40px;
+  }
+
+  .section-title-wrap { flex: 1; }
+
+  .section-title {
+    font-family: var(--display);
+    font-size: 22px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .section-desc {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  .section-rule {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border-glow), transparent);
+  }
+
+  .section-count {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    border: 1px solid var(--border);
+    padding: 2px 8px;
+    border-radius: 2px;
+  }
+
+  /* ── Card grid ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--surface);
+    padding: 1.25rem;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.15s;
+    text-decoration: none;
+    display: block;
+    color: inherit;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--acid);
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .card:hover {
+    background: var(--surface2);
+  }
+
+  .card:hover::before {
+    opacity: 1;
+  }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.6rem;
+  }
+
+  .card-name {
+    font-family: var(--display);
+    font-size: 16px;
+    letter-spacing: 0.05em;
+    color: #dde8d8;
+    line-height: 1.2;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 4px;
+    background: var(--muted);
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+
+  .status-dot.up {
+    background: var(--acid);
+    box-shadow: 0 0 6px rgba(57,255,20,0.6);
+    animation: pulse-green 2s infinite;
+  }
+
+  .status-dot.down {
+    background: var(--red);
+    box-shadow: 0 0 6px rgba(255,48,48,0.5);
+  }
+
+  .status-dot.checking {
+    background: var(--amber);
+    animation: pulse-amber 1s infinite;
+  }
+
+  @keyframes pulse-green {
+    0%, 100% { box-shadow: 0 0 4px rgba(57,255,20,0.6); }
+    50% { box-shadow: 0 0 12px rgba(57,255,20,0.9); }
+  }
+
+  @keyframes pulse-amber {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .card-desc {
+    font-size: 12px;
+    color: #6a8070;
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+    font-family: var(--mono);
+  }
+
+  .card-url {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .card-url::before {
+    content: '//';
+    color: var(--acid);
+    opacity: 0.5;
+    font-weight: 700;
+  }
+
+  .card:hover .card-url { color: var(--acid); }
+
+  .card-badge {
+    position: absolute;
+    bottom: 8px;
+    right: 10px;
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .card:hover .card-badge { opacity: 1; }
+
+  /* ── Status bar ── */
+  .status-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 28px;
+    background: rgba(6,8,9,0.97);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 2rem;
+    gap: 2rem;
+    z-index: 100;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  .status-bar::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--acid), transparent);
+    opacity: 0.3;
+  }
+
+  .sb-item { display: flex; align-items: center; gap: 0.4rem; }
+  .sb-dot { width: 5px; height: 5px; border-radius: 50%; }
+  .sb-up { background: var(--acid); }
+  .sb-down { background: var(--red); }
+  .sb-checking { background: var(--amber); }
+  .sb-label { color: var(--text); font-weight: 500; }
+
+  /* ── Separator ── */
+  .separator {
+    text-align: center;
+    margin: 2rem 0;
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .separator::before, .separator::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #1a2530; border-radius: 3px; }
+
+  /* ── Bottom padding for status bar ── */
+  .spacer { height: 40px; }
+</style>
+</head>
+<body>
+
+<!-- Bubbles -->
+<div class="bubbles" id="bubbles"></div>
+
+<header>
+  <div class="logo">
+    <span class="logo-main">⚗ THE LAB</span>
+    <span class="logo-sub">Control Center v2.6</span>
+  </div>
+  <div class="header-meta">
+    <div class="meta-item">
+      <span class="meta-label">Host</span>
+      <span class="meta-value" style="font-size:11px">JAMIL-PC / 192.0.2.99</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">System Time</span>
+      <span id="clock">--:--:--</span>
+    </div>
+    <div class="header-status">
+      <span id="up-count" class="status-count">—</span>
+      <span>/ <span id="total-count">10</span> online</span>
+    </div>
+  </div>
+</header>
+
+<div class="warning-tape"></div>
+
+<main>
+
+  <!-- AI & AGENTS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-index">01</span>
+      <div class="section-title-wrap">
+        <div class="section-title">AI &amp; Agents</div>
+        <div class="section-desc">Autonomous systems, digests, and experimental intelligence</div>
+      </div>
+      <div class="section-rule"></div>
+      <span class="section-count">4 UNITS</span>
+    </div>
+    <div class="card-grid">
+      <a class="card" href="http://192.0.2.99:3002" target="_blank" data-url="http://192.0.2.99:3002">
+        <div class="card-top">
+          <span class="card-name">SIGNAL AI News</span>
+          <span class="status-dot checking"></span>
+        </div>
+        <div class="card-desc">Daily AI news digest synthesized by agents running on Pi1. Developer + business focus.</div>
+        <div class="card-url">192.0.2.99:3002</div>
+        <span class="card-badge">OPEN →</span>
+      </a>
+      <a class="card" href="http://192.0.2.99:3000" target="_blank" data-url="http://192.0.2.99:3000">
+        <div class="card-top">
+          <span class="card-name">Assistant</span>
+          <span class="status-dot checking"></span>
+        </div>
+        <div class="card-desc">Personal AI assistant with local image generation via Stable Diffusion.</div>
+        <div class="card-url">192.0.2.99:3000</div>
+        <span class="card-badge">OPEN →</span>
+      </a>
+      <a class="card" href="http://192.0.2.99:3456" target="_blank" data-url="http://192.0.2.99:3456">
+        <div class="card-top">
+          <span class="card-name">Agent Build Log</span>
+          <span class="status-dot checking"></span>
+        </div>
+        <div class="card-desc">Central hub tracking all agentic git commits across every repo in the lab.</div>
+        <div class="card-url">192.0.2.99:3456</div>
+        <span class="card-badge">OPEN →</span>
+      </a>
+      <a class="card" href="http://192.0.2.99:8765" target="_blank" data-url="http://192.0.2.99:8765">
+        <div class="card-top">
+          <span class="card-name">Memory Server</span>
+          <span class="status-dot checking"></span>
+        </div>
+        <div class="card-desc">Shared vector memory MCP server. All agents across all devices read and write here.</div>
+        <div class="card-url">192.0.2.99:8765</div>
+        <span class="card-badge">OPEN →</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="separator">✦ ✦ ✦</div>
+
+  <!-- INFRASTRUCTURE -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-index">02</span>
+      <div class="section-title-wrap">
+        <div class="section-title">Infrastructure</div>
+        <div class="section-desc">Compute, storage, metrics, and backbone services</div>
+      </div>
+      <div class="section-rule"></div>
+      <span class="section-count">4 UNITS</span>
+    </div>
+    <div class="card-grid">
+      <a class="card" href="http://192.0.2.99:8741" target="_blank" data-url="http://192.0.2.99:8741">
+        <div class="card-top">
+          <span class="card-name">Lab DB API</span>
+          <span class="status-dot checking"></span>
+        </div>
+        <div class="card-desc">Internal database API for lab data. Postgres-backed with Flyway migrations.</div>
+        <div class="card-url">192.0.2.99:8741</div>
+        <span class="card-badge">OPEN →</span>
+      </a>
+      <a class="card" href="http://192.0.2.99:7860" target="_blank" data-url="http://192.0.2.99:7860">
+        <div class="card-top">
+          <span class="card-name">Stable Diffusion</span>
+          <span class="status-dot checking"></span>
+        </div>
+        <div class="card-desc">Local image generation via AUTOMATIC1111. GPU-accelerated, API mode enabled.</div>
+        <div class="card-url">192.0.2.99:7860</div>
+        <span class="card-badge">OPEN →</span>
+      </a>
+      <a class="card" href="http://192.0.2.101:3000" target="_blank" data-url="http://192.0.2.101:3000">
+        <div class="card-top">
+          <span class="card-name">Gitea</span>
+          <span class="status-dot checking"></span>
+        </div>
+        <div class="card-desc">Self-hosted Git server running on Pi1. Source of truth for internal repos.</div>
+        <div class="card-url">192.0.2.101:3000</div>
+        <span class="card-badge">OPEN →</span>
+      </a>
+      <a class="card" href="http://192.0.2.101:9090" target="_blank" data-url="http://192.0.2.101:9090">
+        <div class="card-top">
+          <span class="card-name">Prometheus</span>
+          <span class="status-dot checking"></span>
+        </div>
+        <div class="card-desc">Metrics collection and monitoring on Pi1. Tracks system and service health.</div>
+        <div class="card-url">192.0.2.101:9090</div>
+        <span class="card-badge">OPEN →</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="separator">✦ ✦ ✦</div>
+
+  <!-- DEVELOPMENT -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-index">03</span>
+      <div class="section-title-wrap">
+        <div class="section-title">Development</div>
+        <div class="section-desc">Public-facing projects and backend services</div>
+      </div>
+      <div class="section-rule"></div>
+      <span class="section-count">2 UNITS</span>
+    </div>
+    <div class="card-grid">
+      <a class="card" href="http://192.0.2.99:3001" target="_blank" data-url="http://192.0.2.99:3001">
+        <div class="card-top">
+          <span class="card-name">Portfolio</span>
+          <span class="status-dot checking"></span>
+        </div>
+        <div class="card-desc">Personal portfolio site. Frontend on :3001, MySQL-backed backend on :5000.</div>
+        <div class="card-url">192.0.2.99:3001</div>
+        <span class="card-badge">OPEN →</span>
+      </a>
+      <a class="card" href="http://192.0.2.99:8000" target="_blank" data-url="http://192.0.2.99:8000">
+        <div class="card-top">
+          <span class="card-name">Assistant Backend</span>
+          <span class="status-dot checking"></span>
+        </div>
+        <div class="card-desc">FastAPI backend powering the assistant. Handles inference routing and tool calls.</div>
+        <div class="card-url">192.0.2.99:8000</div>
+        <span class="card-badge">OPEN →</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+</main>
+
+<!-- Status bar -->
+<div class="status-bar">
+  <div class="sb-item">
+    <div class="sb-dot sb-up"></div>
+    <span class="sb-label" id="sb-up">0</span> <span>up</span>
+  </div>
+  <div class="sb-item">
+    <div class="sb-dot sb-down"></div>
+    <span class="sb-label" id="sb-down">0</span> <span>down</span>
+  </div>
+  <div class="sb-item">
+    <div class="sb-dot sb-checking"></div>
+    <span class="sb-label" id="sb-checking">10</span> <span>checking</span>
+  </div>
+  <div style="flex:1"></div>
+  <span>LAST SWEEP: <span id="last-check" style="color:var(--text)">—</span></span>
+  <span>NEXT IN <span id="next-check" style="color:var(--acid)">30</span>s</span>
+</div>
+
+<script>
+// ── Clock ──
+function tick() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const s = String(now.getSeconds()).padStart(2,'0');
+  const colon = now.getMilliseconds() < 500 ? ':' : ' ';
+  document.getElementById('clock').textContent = `${h}${colon}${m}${colon}${s}`;
+}
+setInterval(tick, 100);
+tick();
+
+// ── Bubbles ──
+const bubbleContainer = document.getElementById('bubbles');
+for (let i = 0; i < 18; i++) {
+  const b = document.createElement('div');
+  b.className = 'bubble';
+  const size = 3 + Math.random() * 6;
+  b.style.cssText = `
+    --dur: ${4 + Math.random() * 8}s;
+    --delay: ${Math.random() * 10}s;
+    --left: ${Math.random() * 100}%;
+    width: ${size}px;
+    height: ${size}px;
+  `;
+  bubbleContainer.appendChild(b);
+}
+
+// ── Status checking ──
+const cards = document.querySelectorAll('.card[data-url]');
+let upCount = 0, downCount = 0;
+let countdown = 30;
+
+async function checkService(card) {
+  const url = card.dataset.url;
+  const dot = card.querySelector('.status-dot');
+  dot.className = 'status-dot checking';
+
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 4000);
+    await fetch(url, { mode: 'no-cors', signal: ctrl.signal });
+    clearTimeout(timer);
+    dot.className = 'status-dot up';
+    return 'up';
+  } catch(e) {
+    dot.className = 'status-dot down';
+    return 'down';
+  }
+}
+
+async function sweepAll() {
+  upCount = 0; downCount = 0;
+  document.getElementById('sb-checking').textContent = cards.length;
+  document.getElementById('sb-up').textContent = 0;
+  document.getElementById('sb-down').textContent = 0;
+
+  const results = await Promise.all([...cards].map(checkService));
+
+  results.forEach(r => {
+    if (r === 'up') upCount++;
+    else downCount++;
+  });
+
+  document.getElementById('sb-up').textContent = upCount;
+  document.getElementById('sb-down').textContent = downCount;
+  document.getElementById('sb-checking').textContent = 0;
+  document.getElementById('up-count').textContent = upCount;
+
+  const now = new Date();
+  document.getElementById('last-check').textContent =
+    `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+
+  countdown = 30;
+}
+
+// Countdown ticker
+setInterval(() => {
+  countdown--;
+  if (countdown <= 0) {
+    sweepAll();
+  }
+  document.getElementById('next-check').textContent = Math.max(0, countdown);
+}, 1000);
+
+// Initial sweep on load
+sweepAll();
+</script>
+</body>
+</html>
