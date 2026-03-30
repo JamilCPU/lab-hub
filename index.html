@@ -408,6 +408,57 @@
 
   .card:hover .card-url { color: var(--acid); }
 
+  /* ── Multi-URL cards ── */
+  .card-links {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 0.5rem;
+  }
+
+  .card-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 10px;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    transition: color 0.15s;
+    padding: 3px 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .card-link:first-child { border-top: none; }
+  .card-link:hover { color: var(--acid); }
+
+  .card-link::before {
+    content: '//';
+    color: var(--acid);
+    opacity: 0.5;
+    font-weight: 700;
+    font-size: 10px;
+    flex-shrink: 0;
+  }
+
+  .link-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--muted);
+    transition: background 0.3s, box-shadow 0.3s;
+    margin-left: auto;
+  }
+
+  .link-dot.up {
+    background: var(--acid);
+    box-shadow: 0 0 5px rgba(57,255,20,0.6);
+  }
+
+  .link-dot.down { background: var(--red); }
+  .link-dot.checking { background: var(--amber); animation: pulse-amber 1s infinite; }
+
   .card-badge {
     position: absolute;
     bottom: 8px;
@@ -507,7 +558,7 @@
     </div>
     <div class="header-status">
       <span id="up-count" class="status-count">—</span>
-      <span>/ <span id="total-count">10</span> online</span>
+      <span>/ <span id="total-count">—</span> online</span>
     </div>
   </div>
 </header>
@@ -528,21 +579,27 @@
       <span class="section-count">4 UNITS</span>
     </div>
     <div class="card-grid">
-      <a class="card" href="http://192.0.2.99:3002" target="_blank" data-url="http://192.0.2.99:3002">
+      <div class="card">
         <div class="card-top">
           <span class="card-name">SIGNAL AI News</span>
-          <span class="status-dot checking"></span>
+          <span class="status-dot checking" id="dot-signal"></span>
         </div>
         <div class="card-desc">Daily AI news digest synthesized by agents running on Pi1. Developer + business focus.</div>
-        <div class="card-url">192.0.2.99:3002</div>
-        <span class="card-badge">OPEN →</span>
-      </a>
+        <div class="card-links">
+          <a class="card-link" href="http://192.0.2.99:3002" target="_blank" data-url="http://192.0.2.99:3002">
+            192.0.2.99:3002 <span class="link-dot checking"></span>
+          </a>
+          <a class="card-link" href="https://ai-news-dgk.pages.dev/" target="_blank" data-url="https://ai-news-dgk.pages.dev/">
+            ai-news-dgk.pages.dev <span class="link-dot checking"></span>
+          </a>
+        </div>
+      </div>
       <a class="card" href="http://192.0.2.99:3000" target="_blank" data-url="http://192.0.2.99:3000">
         <div class="card-top">
           <span class="card-name">Assistant</span>
           <span class="status-dot checking"></span>
         </div>
-        <div class="card-desc">Personal AI assistant with local image generation via Stable Diffusion.</div>
+        <div class="card-desc">Personal AI assistant. Handles inference routing and tool calls.</div>
         <div class="card-url">192.0.2.99:3000</div>
         <span class="card-badge">OPEN →</span>
       </a>
@@ -578,7 +635,7 @@
         <div class="section-desc">Compute, storage, metrics, and backbone services</div>
       </div>
       <div class="section-rule"></div>
-      <span class="section-count">4 UNITS</span>
+      <span class="section-count">2 UNITS</span>
     </div>
     <div class="card-grid">
       <a class="card" href="http://192.0.2.99:8741" target="_blank" data-url="http://192.0.2.99:8741">
@@ -590,68 +647,24 @@
         <div class="card-url">192.0.2.99:8741</div>
         <span class="card-badge">OPEN →</span>
       </a>
-      <a class="card" href="http://192.0.2.99:7860" target="_blank" data-url="http://192.0.2.99:7860">
-        <div class="card-top">
-          <span class="card-name">Stable Diffusion</span>
-          <span class="status-dot checking"></span>
-        </div>
-        <div class="card-desc">Local image generation via AUTOMATIC1111. GPU-accelerated, API mode enabled.</div>
-        <div class="card-url">192.0.2.99:7860</div>
-        <span class="card-badge">OPEN →</span>
-      </a>
-      <a class="card" href="http://192.0.2.101:3000" target="_blank" data-url="http://192.0.2.101:3000">
-        <div class="card-top">
-          <span class="card-name">Gitea</span>
-          <span class="status-dot checking"></span>
-        </div>
-        <div class="card-desc">Self-hosted Git server running on Pi1. Source of truth for internal repos.</div>
-        <div class="card-url">192.0.2.101:3000</div>
-        <span class="card-badge">OPEN →</span>
-      </a>
-      <a class="card" href="http://192.0.2.101:9090" target="_blank" data-url="http://192.0.2.101:9090">
+      <div class="card">
         <div class="card-top">
           <span class="card-name">Prometheus</span>
-          <span class="status-dot checking"></span>
+          <span class="status-dot checking" id="dot-prometheus"></span>
         </div>
-        <div class="card-desc">Metrics collection and monitoring on Pi1. Tracks system and service health.</div>
-        <div class="card-url">192.0.2.101:9090</div>
-        <span class="card-badge">OPEN →</span>
-      </a>
-    </div>
-  </div>
-
-  <div class="separator">✦ ✦ ✦</div>
-
-  <!-- DEVELOPMENT -->
-  <div class="section">
-    <div class="section-header">
-      <span class="section-index">03</span>
-      <div class="section-title-wrap">
-        <div class="section-title">Development</div>
-        <div class="section-desc">Public-facing projects and backend services</div>
+        <div class="card-desc">Metrics collection across all Pi nodes. Tracks system and service health.</div>
+        <div class="card-links">
+          <a class="card-link" href="http://192.0.2.101:9090" target="_blank" data-url="http://192.0.2.101:9090">
+            Pi1 — 192.0.2.101:9090 <span class="link-dot checking"></span>
+          </a>
+          <a class="card-link" href="http://192.0.2.102:9090" target="_blank" data-url="http://192.0.2.102:9090">
+            Pi2 — 192.0.2.102:9090 <span class="link-dot checking"></span>
+          </a>
+          <a class="card-link" href="http://192.0.2.103:9090" target="_blank" data-url="http://192.0.2.103:9090">
+            Pi3 — 192.0.2.103:9090 <span class="link-dot checking"></span>
+          </a>
+        </div>
       </div>
-      <div class="section-rule"></div>
-      <span class="section-count">2 UNITS</span>
-    </div>
-    <div class="card-grid">
-      <a class="card" href="http://192.0.2.99:3001" target="_blank" data-url="http://192.0.2.99:3001">
-        <div class="card-top">
-          <span class="card-name">Portfolio</span>
-          <span class="status-dot checking"></span>
-        </div>
-        <div class="card-desc">Personal portfolio site. Frontend on :3001, MySQL-backed backend on :5000.</div>
-        <div class="card-url">192.0.2.99:3001</div>
-        <span class="card-badge">OPEN →</span>
-      </a>
-      <a class="card" href="http://192.0.2.99:8000" target="_blank" data-url="http://192.0.2.99:8000">
-        <div class="card-top">
-          <span class="card-name">Assistant Backend</span>
-          <span class="status-dot checking"></span>
-        </div>
-        <div class="card-desc">FastAPI backend powering the assistant. Handles inference routing and tool calls.</div>
-        <div class="card-url">192.0.2.99:8000</div>
-        <span class="card-badge">OPEN →</span>
-      </a>
     </div>
   </div>
 
@@ -707,39 +720,76 @@ for (let i = 0; i < 18; i++) {
 }
 
 // ── Status checking ──
-const cards = document.querySelectorAll('.card[data-url]');
-let upCount = 0, downCount = 0;
-let countdown = 30;
+// Single-URL cards: <a class="card" data-url="...">
+// Multi-URL cards:  <div class="card"> with <a class="card-link" data-url="..."> children
+const singleCards = document.querySelectorAll('a.card[data-url]');
+const multiLinks  = document.querySelectorAll('.card-link[data-url]');
+const totalUrls   = singleCards.length + multiLinks.length;
 
-async function checkService(card) {
-  const url = card.dataset.url;
-  const dot = card.querySelector('.status-dot');
-  dot.className = 'status-dot checking';
+document.getElementById('total-count').textContent = totalUrls;
+document.getElementById('sb-checking').textContent = totalUrls;
 
+let upCount = 0, downCount = 0, countdown = 30;
+
+async function ping(url) {
   try {
     const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 4000);
+    const t = setTimeout(() => ctrl.abort(), 4000);
     await fetch(url, { mode: 'no-cors', signal: ctrl.signal });
-    clearTimeout(timer);
-    dot.className = 'status-dot up';
+    clearTimeout(t);
     return 'up';
   } catch(e) {
-    dot.className = 'status-dot down';
     return 'down';
   }
 }
 
+async function checkSingle(card) {
+  const dot = card.querySelector('.status-dot');
+  dot.className = 'status-dot checking';
+  const r = await ping(card.dataset.url);
+  dot.className = `status-dot ${r}`;
+  return r;
+}
+
+async function checkLink(link) {
+  const dot = link.querySelector('.link-dot');
+  dot.className = 'link-dot checking';
+  const r = await ping(link.dataset.url);
+  dot.className = `link-dot ${r}`;
+  return r;
+}
+
+// Update aggregate dot on a multi-card based on its child link results
+function updateAggregateDot(dotId, results) {
+  const dot = document.getElementById(dotId);
+  if (!dot) return;
+  if (results.every(r => r === 'up'))   dot.className = 'status-dot up';
+  else if (results.some(r => r === 'up')) dot.className = 'status-dot checking'; // partial
+  else dot.className = 'status-dot down';
+}
+
 async function sweepAll() {
   upCount = 0; downCount = 0;
-  document.getElementById('sb-checking').textContent = cards.length;
+  document.getElementById('sb-checking').textContent = totalUrls;
   document.getElementById('sb-up').textContent = 0;
   document.getElementById('sb-down').textContent = 0;
 
-  const results = await Promise.all([...cards].map(checkService));
+  // Check all in parallel
+  const [singleResults, signalResults, prometheusResults] = await Promise.all([
+    Promise.all([...singleCards].map(checkSingle)),
+    Promise.all([...document.querySelectorAll('.card-link[data-url]')].filter(l =>
+      l.closest('.card') === document.getElementById('dot-signal')?.closest('.card')
+    ).map(checkLink)),
+    Promise.all([...document.querySelectorAll('.card-link[data-url]')].filter(l =>
+      l.closest('.card') === document.getElementById('dot-prometheus')?.closest('.card')
+    ).map(checkLink)),
+  ]);
 
-  results.forEach(r => {
-    if (r === 'up') upCount++;
-    else downCount++;
+  updateAggregateDot('dot-signal', signalResults);
+  updateAggregateDot('dot-prometheus', prometheusResults);
+
+  [...singleResults, ...signalResults, ...prometheusResults].forEach(r => {
+    if (r === 'up') upCount++; else downCount++;
   });
 
   document.getElementById('sb-up').textContent = upCount;
@@ -754,16 +804,12 @@ async function sweepAll() {
   countdown = 30;
 }
 
-// Countdown ticker
 setInterval(() => {
   countdown--;
-  if (countdown <= 0) {
-    sweepAll();
-  }
+  if (countdown <= 0) sweepAll();
   document.getElementById('next-check').textContent = Math.max(0, countdown);
 }, 1000);
 
-// Initial sweep on load
 sweepAll();
 </script>
 </body>
