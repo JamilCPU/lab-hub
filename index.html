@@ -2,796 +2,828 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>THE LAB — Control Center</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CTRL CENTER — DESERT DUSK</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=JetBrains+Mono:wght@400;500;700&family=Creepster&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #060809;
-    --surface: #0c1014;
-    --surface2: #111820;
-    --border: #1a2530;
-    --border-glow: #2a4a3a;
-    --text: #b8c8b0;
-    --muted: #3a5040;
-    --acid: #39ff14;
-    --acid-dim: rgba(57,255,20,0.08);
-    --acid-mid: rgba(57,255,20,0.15);
-    --amber: #ffb000;
-    --amber-dim: rgba(255,176,0,0.1);
-    --red: #ff3030;
-    --red-dim: rgba(255,48,48,0.1);
-    --mono: 'JetBrains Mono', 'Share Tech Mono', monospace;
-    --display: 'Special Elite', serif;
-    --horror: 'Creepster', cursive;
-  }
-
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  html { scrollbar-width: thin; scrollbar-color: #1a2530 #060809; }
+  /* CRT scanlines */
+  html::after {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.15) 2px,
+      rgba(0,0,0,0.15) 4px
+    );
+    pointer-events: none; z-index: 9998;
+  }
 
-  body {
+  :root {
+    --bg: #070b07;
+    --primary: #b8dcb0;
+    --accent: #39d353;
+    --orange: #e8a020;
+    --up: #39d353;
+    --down: #e05252;
+    --checking: #e8a020;
+    --muted: #4a6b4a;
+    --mono: 'Share Tech Mono', monospace;
+    --sans: 'Rajdhani', sans-serif;
+  }
+
+  html, body {
     background: var(--bg);
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 13px;
+    color: var(--primary);
+    font-family: var(--sans);
+    font-weight: 500;
     min-height: 100vh;
     overflow-x: hidden;
   }
 
-  /* ── Noise + scanline overlay ── */
+  /* Background grid */
   body::before {
     content: '';
     position: fixed;
     inset: 0;
     background-image:
-      repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(0,0,0,0.08) 2px,
-        rgba(0,0,0,0.08) 4px
-      );
-    pointer-events: none;
-    z-index: 1000;
-    animation: scanroll 8s linear infinite;
-  }
-
-  @keyframes scanroll {
-    0% { background-position: 0 0; }
-    100% { background-position: 0 100px; }
-  }
-
-  /* ── Bubbling background ── */
-  .bubbles {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 100%;
-    overflow: hidden;
+      linear-gradient(rgba(57,211,83,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(57,211,83,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
     pointer-events: none;
     z-index: 0;
   }
 
-  .bubble {
-    position: absolute;
-    bottom: -60px;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--acid);
-    opacity: 0;
-    animation: bubble-rise var(--dur) ease-in infinite;
-    animation-delay: var(--delay);
-    left: var(--left);
-  }
-
-  .bubble::after {
+  /* Radar rings */
+  body::after {
     content: '';
-    position: absolute;
-    inset: -1px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 900px;
+    height: 900px;
     border-radius: 50%;
     background: transparent;
-    border: 1px solid rgba(57,255,20,0.3);
+    box-shadow:
+      0 0 0 1px rgba(57,211,83,0.03),
+      0 0 0 200px rgba(57,211,83,0.015),
+      0 0 0 400px rgba(57,211,83,0.015),
+      0 0 0 600px rgba(57,211,83,0.015);
+    pointer-events: none;
+    z-index: 0;
   }
 
-  @keyframes bubble-rise {
-    0% { opacity: 0; transform: translateY(0) scale(1); }
-    10% { opacity: 0.6; }
-    80% { opacity: 0.2; }
-    100% { opacity: 0; transform: translateY(-100vh) scale(0.3); }
-  }
-
-  /* ── Header ── */
-  header {
-    position: sticky;
+  /* Scan line overlay */
+  #scan-line {
+    position: fixed;
     top: 0;
-    z-index: 100;
-    background: rgba(6,8,9,0.96);
-    border-bottom: 1px solid var(--border);
-    padding: 0 2rem;
-    height: 64px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--accent);
+    box-shadow: 0 0 8px 2px var(--accent), 0 0 20px 4px rgba(57,211,83,0.4);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  #scan-line.scanning {
+    animation: scanSweep 2s ease-in forwards;
+  }
+
+  @keyframes scanSweep {
+    0%   { top: 0;    opacity: 1; }
+    85%  { opacity: 0.8; }
+    100% { top: 100vh; opacity: 0; }
+  }
+
+  /* Layout */
+  #app {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* ── HEADER ── */
+  header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    backdrop-filter: blur(12px);
+    padding: 20px 0 18px;
+    border-bottom: 1px solid var(--accent);
+    box-shadow: 0 1px 8px rgba(57,211,83,0.2);
+    margin-bottom: 36px;
+    gap: 16px;
   }
 
-  header::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--acid), var(--amber), transparent);
-    opacity: 0.4;
-    animation: scan-line 4s ease-in-out infinite;
-  }
-
-  @keyframes scan-line {
-    0%, 100% { opacity: 0.2; }
-    50% { opacity: 0.6; }
-  }
-
-  .logo {
-    display: flex;
-    align-items: baseline;
-    gap: 1rem;
-  }
-
-  .logo-main {
-    font-family: var(--horror);
-    font-size: 28px;
-    color: var(--acid);
-    letter-spacing: 0.15em;
-    text-shadow: 0 0 20px rgba(57,255,20,0.5), 0 0 40px rgba(57,255,20,0.2);
-    animation: flicker 6s infinite;
-  }
-
-  @keyframes flicker {
-    0%, 95%, 100% { opacity: 1; }
-    96% { opacity: 0.6; }
-    97% { opacity: 1; }
-    98% { opacity: 0.4; }
-    99% { opacity: 1; }
-  }
-
-  .logo-sub {
-    font-size: 10px;
-    color: var(--muted);
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-  }
-
-  .header-meta {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-  }
-
-  .meta-item {
+  .header-left {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
     gap: 2px;
   }
 
-  .meta-label {
-    font-size: 9px;
-    color: var(--muted);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-  }
-
-  .meta-value {
-    font-size: 12px;
-    color: var(--acid);
-    font-weight: 500;
-  }
-
-  #clock {
-    font-size: 18px;
+  .header-title {
+    font-family: var(--sans);
     font-weight: 700;
-    color: var(--acid);
-    text-shadow: 0 0 10px rgba(57,255,20,0.4);
-    letter-spacing: 0.05em;
-  }
-
-  .header-status {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 11px;
-    color: var(--muted);
-  }
-
-  .status-count {
-    font-size: 11px;
-    color: var(--acid);
-    font-weight: 700;
-  }
-
-  /* ── Warning tape ── */
-  .warning-tape {
-    height: 6px;
-    background: repeating-linear-gradient(
-      45deg,
-      var(--amber),
-      var(--amber) 12px,
-      #1a1200 12px,
-      #1a1200 24px
-    );
-    opacity: 0.7;
-  }
-
-  /* ── Main layout ── */
-  main {
-    position: relative;
-    z-index: 1;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 3rem 2rem;
-  }
-
-  /* ── Section ── */
-  .section {
-    margin-bottom: 3.5rem;
-  }
-
-  .section-header {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .section-index {
-    font-family: var(--horror);
-    font-size: 40px;
-    color: var(--acid);
-    opacity: 0.15;
-    line-height: 1;
-    min-width: 40px;
-  }
-
-  .section-title-wrap { flex: 1; }
-
-  .section-title {
-    font-family: var(--display);
-    font-size: 22px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--text);
-    margin-bottom: 4px;
-  }
-
-  .section-desc {
-    font-size: 11px;
-    color: var(--muted);
+    font-size: 2.2rem;
+    color: var(--accent);
     letter-spacing: 0.08em;
+    line-height: 1;
+    text-shadow: 0 0 20px rgba(57,211,83,0.7), 0 0 40px rgba(57,211,83,0.3);
   }
 
-  .section-rule {
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(90deg, var(--border-glow), transparent);
-  }
-
-  .section-count {
-    font-size: 10px;
+  .header-sub {
+    font-size: 0.72rem;
     color: var(--muted);
-    letter-spacing: 0.1em;
-    border: 1px solid var(--border);
-    padding: 2px 8px;
-    border-radius: 2px;
-  }
-
-  /* ── Card grid ── */
-  .card-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1px;
-    background: var(--border);
-    border: 1px solid var(--border);
-  }
-
-  /* ── Card ── */
-  .card {
-    background: var(--surface);
-    padding: 1.25rem;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    transition: background 0.15s;
-    text-decoration: none;
-    display: block;
-    color: inherit;
-  }
-
-  .card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 3px;
-    height: 100%;
-    background: var(--acid);
-    opacity: 0;
-    transition: opacity 0.15s;
-  }
-
-  .card:hover {
-    background: var(--surface2);
-  }
-
-  .card:hover::before {
-    opacity: 1;
-  }
-
-  .card-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 0.6rem;
-  }
-
-  .card-name {
-    font-family: var(--display);
-    font-size: 16px;
-    letter-spacing: 0.05em;
-    color: #dde8d8;
-    line-height: 1.2;
-  }
-
-  .status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    margin-top: 4px;
-    background: var(--muted);
-    transition: background 0.3s, box-shadow 0.3s;
-  }
-
-  .status-dot.up {
-    background: var(--acid);
-    box-shadow: 0 0 6px rgba(57,255,20,0.6);
-    animation: pulse-green 2s infinite;
-  }
-
-  .status-dot.down {
-    background: var(--red);
-    box-shadow: 0 0 6px rgba(255,48,48,0.5);
-  }
-
-  .status-dot.checking {
-    background: var(--amber);
-    animation: pulse-amber 1s infinite;
-  }
-
-  @keyframes pulse-green {
-    0%, 100% { box-shadow: 0 0 4px rgba(57,255,20,0.6); }
-    50% { box-shadow: 0 0 12px rgba(57,255,20,0.9); }
-  }
-
-  @keyframes pulse-amber {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-
-  .card-desc {
-    font-size: 12px;
-    color: #6a8070;
-    margin-bottom: 0.75rem;
-    line-height: 1.5;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
     font-family: var(--mono);
   }
 
-  .card-url {
-    font-size: 10px;
+  .header-center {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 1.0rem;
     color: var(--muted);
-    letter-spacing: 0.05em;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    flex: 1;
+    text-align: center;
+  }
+
+  .header-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    color: var(--primary);
+  }
+
+  #clock {
+    font-size: 1.4rem;
+    color: var(--accent);
+    letter-spacing: 0.06em;
+    text-shadow: 0 0 10px rgba(57,211,83,0.4);
+    font-family: var(--mono);
+  }
+
+  .header-status-counts {
+    color: var(--muted);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+  }
+
+  .header-status-counts span {
+    color: var(--accent);
+  }
+
+  /* ── SECTOR HEADERS ── */
+  .sector {
+    margin-bottom: 36px;
+  }
+
+  .sector-label {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 0.68rem;
+    color: var(--orange);
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .sector-title-bar {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 12px;
+    margin-bottom: 20px;
   }
 
-  .card-url::before {
-    content: '//';
-    color: var(--acid);
-    opacity: 0.5;
+  .sector-bracket-left {
+    color: var(--orange);
+    font-family: var(--sans);
     font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
   }
 
-  .card:hover .card-url { color: var(--acid); }
+  .sector-name {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--primary);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
 
-  /* ── Multi-URL cards ── */
+  .sector-line {
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, var(--orange) 0%, var(--muted) 60%, transparent 100%);
+    opacity: 0.5;
+  }
+
+  .sector-bracket-right {
+    color: var(--orange);
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+
+  /* ── CARD GRID ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+
+  /* ── CARD — CORNER BRACKET DESIGN ── */
+  .card-wrap {
+    position: relative;
+    padding: 2px;
+  }
+
+  /* Corner brackets: top-left and top-right on .card-wrap */
+  .card-wrap::before,
+  .card-wrap::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-color: var(--accent);
+    border-style: solid;
+    z-index: 2;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .card-wrap::before {
+    top: 0; left: 0;
+    border-width: 2px 0 0 2px;
+  }
+
+  .card-wrap::after {
+    top: 0; right: 0;
+    border-width: 2px 2px 0 0;
+  }
+
+  /* Bottom corners via pseudo-elements on .card-inner */
+  .card-inner {
+    position: relative;
+    padding: 18px 20px 16px;
+    border: 1px solid rgba(57,211,83,0.08);
+  }
+
+  .card-inner::before,
+  .card-inner::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-color: var(--accent);
+    border-style: solid;
+    z-index: 2;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .card-inner::before {
+    bottom: 0; left: 0;
+    border-width: 0 0 2px 2px;
+  }
+
+  .card-inner::after {
+    bottom: 0; right: 0;
+    border-width: 0 2px 2px 0;
+  }
+
+  .card-wrap:hover::before,
+  .card-wrap:hover::after,
+  .card-wrap:hover .card-inner::before,
+  .card-wrap:hover .card-inner::after {
+    border-color: var(--accent);
+    box-shadow: 0 0 10px rgba(57,211,83,0.7);
+  }
+
+  /* ── CARD CONTENT ── */
+  a.card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  a.card:hover .card-title {
+    color: var(--accent);
+    text-shadow: 0 0 8px rgba(57,211,83,0.5);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  .card-title {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--primary);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+    line-height: 1.2;
+  }
+
+  .card-desc {
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: 0.8rem;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+    margin-bottom: 10px;
+  }
+
+  /* ── STATUS DOTS — Diamond (rotated square) ── */
+  .status-dot,
+  .link-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    transform: rotate(45deg);
+    flex-shrink: 0;
+    margin-top: 3px;
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+
+  .status-dot.up,       .link-dot.up       { background: var(--up);       box-shadow: 0 0 6px var(--up); }
+  .status-dot.down,     .link-dot.down     { background: var(--down);     box-shadow: 0 0 6px var(--down); }
+  .status-dot.checking, .link-dot.checking {
+    background: var(--checking);
+    box-shadow: 0 0 6px var(--checking);
+    animation: pulse 0.8s ease-in-out infinite alternate;
+  }
+
+  @keyframes pulse {
+    from { opacity: 0.4; }
+    to   { opacity: 1; }
+  }
+
+  /* ── MULTI-URL CARD LINKS ── */
   .card-links {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    margin-top: 0.5rem;
+    margin-top: 8px;
   }
 
-  .card-link {
+  a.card-link {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 10px;
-    color: var(--muted);
+    gap: 8px;
     text-decoration: none;
-    letter-spacing: 0.05em;
-    transition: color 0.15s;
-    padding: 3px 0;
-    border-top: 1px solid var(--border);
+    padding: 5px 8px;
+    border-left: 1px solid var(--muted);
+    transition: border-color 0.2s, background 0.2s;
   }
 
-  .card-link:first-child { border-top: none; }
-  .card-link:hover { color: var(--acid); }
-
-  .card-link::before {
-    content: '//';
-    color: var(--acid);
-    opacity: 0.5;
-    font-weight: 700;
-    font-size: 10px;
-    flex-shrink: 0;
+  a.card-link:hover {
+    border-left-color: var(--accent);
+    background: rgba(57,211,83,0.04);
   }
 
-  .link-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    background: var(--muted);
-    transition: background 0.3s, box-shadow 0.3s;
-    margin-left: auto;
+  a.card-link .link-label {
+    font-family: var(--mono);
+    font-size: 0.73rem;
+    color: var(--primary);
+    letter-spacing: 0.02em;
   }
 
-  .link-dot.up {
-    background: var(--acid);
-    box-shadow: 0 0 5px rgba(57,255,20,0.6);
+  a.card-link:hover .link-label {
+    color: var(--accent);
   }
 
-  .link-dot.down { background: var(--red); }
-  .link-dot.checking { background: var(--amber); animation: pulse-amber 1s infinite; }
-
-  .card-badge {
-    position: absolute;
-    bottom: 8px;
-    right: 10px;
-    font-size: 9px;
+  /* ── SINGLE CARD URL CHIP ── */
+  .card-url {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.7rem;
     color: var(--muted);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    opacity: 0;
-    transition: opacity 0.15s;
+    letter-spacing: 0.02em;
+    margin-top: 2px;
   }
 
-  .card:hover .card-badge { opacity: 1; }
-
-  /* ── Status bar ── */
-  .status-bar {
+  /* ── BOTTOM STATUS BAR ── */
+  #status-bar {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-    height: 28px;
-    background: rgba(6,8,9,0.97);
-    border-top: 1px solid var(--border);
+    height: 34px;
+    background: rgba(7,11,7,0.97);
+    border-top: 1px solid var(--muted);
     display: flex;
     align-items: center;
-    padding: 0 2rem;
-    gap: 2rem;
+    padding: 0 24px;
+    gap: 0;
     z-index: 100;
-    font-size: 10px;
-    color: var(--muted);
-    letter-spacing: 0.08em;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--primary);
+    letter-spacing: 0.05em;
   }
 
-  .status-bar::before {
-    content: '';
-    position: absolute;
-    top: -1px;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--acid), transparent);
-    opacity: 0.3;
-  }
-
-  .sb-item { display: flex; align-items: center; gap: 0.4rem; }
-  .sb-dot { width: 5px; height: 5px; border-radius: 50%; }
-  .sb-up { background: var(--acid); }
-  .sb-down { background: var(--red); }
-  .sb-checking { background: var(--amber); }
-  .sb-label { color: var(--text); font-weight: 500; }
-
-  /* ── Separator ── */
-  .separator {
-    text-align: center;
-    margin: 2rem 0;
-    color: var(--muted);
-    font-size: 10px;
-    letter-spacing: 0.3em;
+  .sb-segment {
     display: flex;
     align-items: center;
-    gap: 1rem;
-  }
-  .separator::before, .separator::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
+    gap: 6px;
+    padding: 0 18px 0 0;
+    margin-right: 18px;
+    border-right: 1px solid var(--muted);
   }
 
-  /* ── Scrollbar ── */
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #1a2530; border-radius: 3px; }
+  .sb-segment:last-child {
+    border-right: none;
+    margin-right: 0;
+  }
 
-  /* ── Bottom padding for status bar ── */
-  .spacer { height: 40px; }
+  .sb-label { color: var(--muted); }
+  .sb-val-up    { color: var(--up);       text-shadow: 0 0 6px rgba(57,211,83,0.4); }
+  .sb-val-down  { color: var(--down);     text-shadow: 0 0 6px rgba(224,82,82,0.4); }
+  .sb-val-check { color: var(--checking); }
+  .sb-val-time  { color: var(--accent); }
+  .sb-val-next  { color: var(--primary); }
+
+  .sb-spacer { flex: 1; }
+
+  /* ══ APP NAV ══ */
+  .app-nav {
+    display: flex; align-items: center; gap: 14px;
+    padding: 7px 0;
+    font-family: var(--mono); font-size: 0.68rem;
+    letter-spacing: 0.1em; border-bottom: 1px solid rgba(57,211,83,0.25);
+    margin-bottom: 0;
+  }
+  .app-nav .nav-current { color: var(--primary); }
+  .app-nav .nav-sep { color: var(--muted); opacity: 0.4; }
+  .app-nav a.nav-link {
+    color: var(--muted); text-decoration: none;
+    padding: 3px 10px; border: 1px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .app-nav a.nav-link:hover { color: var(--accent); border-color: var(--accent); }
+  .app-nav a.nav-link.nav-action {
+    color: var(--orange); border-color: rgba(232,160,32,0.4);
+    margin-left: auto;
+  }
+  .app-nav a.nav-link.nav-action:hover { border-color: var(--orange); }
 </style>
 </head>
 <body>
 
-<!-- Bubbles -->
-<div class="bubbles" id="bubbles"></div>
+<div id="scan-line"></div>
 
-<header>
-  <div class="logo">
-    <span class="logo-main">⚗ THE LAB</span>
-    <span class="logo-sub">Control Center v2.6</span>
-  </div>
-  <div class="header-meta">
-    <div class="meta-item">
-      <span class="meta-label">Host</span>
-      <span class="meta-value" style="font-size:11px">JAMIL-PC / 192.0.2.99</span>
+<div id="app">
+
+  <!-- ══ APP NAV ══ -->
+  <nav class="app-nav">
+    <span class="nav-current">CTRL CENTER</span>
+    <span class="nav-sep">/</span>
+    <a class="nav-link nav-action" href="/mc/">MISSION CONTROL →</a>
+  </nav>
+
+  <!-- ══ HEADER ══ -->
+  <header>
+    <div class="header-left">
+      <div class="header-title">CTRL CENTER</div>
+      <div class="header-sub">OPERATIONAL DASHBOARD v3.0</div>
     </div>
-    <div class="meta-item">
-      <span class="meta-label">System Time</span>
-      <span id="clock">--:--:--</span>
-    </div>
-    <div class="header-status">
-      <span id="up-count" class="status-count">—</span>
-      <span>/ <span id="total-count">—</span> online</span>
-    </div>
-  </div>
-</header>
 
-<div class="warning-tape"></div>
-
-<main>
-
-  <!-- AI & AGENTS -->
-  <div class="section">
-    <div class="section-header">
-      <span class="section-index">01</span>
-      <div class="section-title-wrap">
-        <div class="section-title">AI &amp; Agents</div>
-        <div class="section-desc">Autonomous systems, digests, and experimental intelligence</div>
+    <div class="header-right">
+      <div id="clock">00:00:00</div>
+      <div class="header-status-counts">
+        <span id="up-count">0</span>&nbsp;/&nbsp;<span id="total-count">0</span>&nbsp;ACTIVE
       </div>
-      <div class="section-rule"></div>
-      <span class="section-count">4 UNITS</span>
     </div>
+  </header>
+
+  <!-- ══════════════════════════════════
+       SECTOR 01 — AI & AGENTS
+  ══════════════════════════════════ -->
+  <section class="sector">
+    <div class="sector-label">SECTOR 01</div>
+    <div class="sector-title-bar">
+      <span class="sector-bracket-left">[&#9552;&#9552;</span>
+      <span class="sector-name">AI &amp; Agents</span>
+      <div class="sector-line"></div>
+      <span class="sector-bracket-right">&#9552;&#9552;]</span>
+    </div>
+
     <div class="card-grid">
-      <div class="card">
-        <div class="card-top">
-          <span class="card-name">SIGNAL AI News</span>
-          <span class="status-dot checking" id="dot-signal"></span>
+
+      <!-- SIGNAL AI News — multi-URL -->
+      <div class="card-wrap">
+        <div class="card-inner">
+          <div class="card-header">
+            <div class="card-title">Signal AI News</div>
+            <span class="status-dot checking" id="dot-signal"></span>
+          </div>
+          <div class="card-desc">Daily AI news digest synthesized by agents on Pi1.</div>
+          <div class="card-links">
+            <a class="card-link" href="http://192.0.2.101:3002" target="_blank" data-url="http://192.0.2.101:3002">
+              <span class="link-dot checking"></span>
+              <span class="link-label">192.0.2.101:3002</span>
+            </a>
+            <a class="card-link" href="https://ai-news-dgk.pages.dev/" target="_blank" data-url="https://ai-news-dgk.pages.dev/">
+              <span class="link-dot checking"></span>
+              <span class="link-label">ai-news-dgk.pages.dev</span>
+            </a>
+          </div>
         </div>
-        <div class="card-desc">Daily AI news digest synthesized by agents running on Pi1. Developer + business focus.</div>
-        <div class="card-links">
-          <a class="card-link" href="http://192.0.2.99:3002" target="_blank" data-url="http://192.0.2.99:3002">
-            192.0.2.99:3002 <span class="link-dot checking"></span>
-          </a>
-          <a class="card-link" href="https://ai-news-dgk.pages.dev/" target="_blank" data-url="https://ai-news-dgk.pages.dev/">
-            ai-news-dgk.pages.dev <span class="link-dot checking"></span>
+      </div>
+
+      <!-- Assistant -->
+      <div class="card-wrap">
+        <div class="card-inner">
+          <a class="card" href="http://192.0.2.99:3000" target="_blank" data-url="http://192.0.2.99:3000">
+            <div class="card-header">
+              <div class="card-title">Assistant</div>
+              <span class="status-dot checking"></span>
+            </div>
+            <div class="card-desc">Personal AI assistant. Inference routing and tool calls.</div>
+            <div class="card-url">192.0.2.99:3000</div>
           </a>
         </div>
       </div>
-      <a class="card" href="http://192.0.2.99:3000" target="_blank" data-url="http://192.0.2.99:3000">
-        <div class="card-top">
-          <span class="card-name">Assistant</span>
-          <span class="status-dot checking"></span>
-        </div>
-        <div class="card-desc">Personal AI assistant. Handles inference routing and tool calls.</div>
-        <div class="card-url">192.0.2.99:3000</div>
-        <span class="card-badge">OPEN →</span>
-      </a>
-      <a class="card" href="http://192.0.2.99:3456" target="_blank" data-url="http://192.0.2.99:3456">
-        <div class="card-top">
-          <span class="card-name">Agent Build Log</span>
-          <span class="status-dot checking"></span>
-        </div>
-        <div class="card-desc">Central hub tracking all agentic git commits across every repo in the lab.</div>
-        <div class="card-url">192.0.2.99:3456</div>
-        <span class="card-badge">OPEN →</span>
-      </a>
-      <a class="card" href="http://192.0.2.99:8765" target="_blank" data-url="http://192.0.2.99:8765">
-        <div class="card-top">
-          <span class="card-name">Memory Server</span>
-          <span class="status-dot checking"></span>
-        </div>
-        <div class="card-desc">Shared vector memory MCP server. All agents across all devices read and write here.</div>
-        <div class="card-url">192.0.2.99:8765</div>
-        <span class="card-badge">OPEN →</span>
-      </a>
-    </div>
-  </div>
 
-  <div class="separator">✦ ✦ ✦</div>
-
-  <!-- INFRASTRUCTURE -->
-  <div class="section">
-    <div class="section-header">
-      <span class="section-index">02</span>
-      <div class="section-title-wrap">
-        <div class="section-title">Infrastructure</div>
-        <div class="section-desc">Compute, storage, metrics, and backbone services</div>
+      <!-- Agent Build Log -->
+      <div class="card-wrap">
+        <div class="card-inner">
+          <a class="card" href="http://192.0.2.99:3456" target="_blank" data-url="http://192.0.2.99:3456">
+            <div class="card-header">
+              <div class="card-title">Agent Build Log</div>
+              <span class="status-dot checking"></span>
+            </div>
+            <div class="card-desc">Tracks all agentic git commits across every repo.</div>
+            <div class="card-url">192.0.2.99:3456</div>
+          </a>
+        </div>
       </div>
-      <div class="section-rule"></div>
-      <span class="section-count">2 UNITS</span>
+
+      <!-- Memory Server -->
+      <div class="card-wrap">
+        <div class="card-inner">
+          <a class="card" href="http://192.0.2.99:8765" target="_blank" data-url="http://192.0.2.99:8765">
+            <div class="card-header">
+              <div class="card-title">Memory Server</div>
+              <span class="status-dot checking"></span>
+            </div>
+            <div class="card-desc">Shared vector memory MCP server for all agents.</div>
+            <div class="card-url">192.0.2.99:8765</div>
+          </a>
+        </div>
+      </div>
+
     </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       SECTOR 02 — INFRASTRUCTURE
+  ══════════════════════════════════ -->
+  <section class="sector">
+    <div class="sector-label">SECTOR 02</div>
+    <div class="sector-title-bar">
+      <span class="sector-bracket-left">[&#9552;&#9552;</span>
+      <span class="sector-name">Infrastructure</span>
+      <div class="sector-line"></div>
+      <span class="sector-bracket-right">&#9552;&#9552;]</span>
+    </div>
+
     <div class="card-grid">
-      <a class="card" href="http://192.0.2.99:8741" target="_blank" data-url="http://192.0.2.99:8741">
-        <div class="card-top">
-          <span class="card-name">Lab DB API</span>
-          <span class="status-dot checking"></span>
-        </div>
-        <div class="card-desc">Internal database API for lab data. Postgres-backed with Flyway migrations.</div>
-        <div class="card-url">192.0.2.99:8741</div>
-        <span class="card-badge">OPEN →</span>
-      </a>
-      <div class="card">
-        <div class="card-top">
-          <span class="card-name">Prometheus</span>
-          <span class="status-dot checking" id="dot-prometheus"></span>
-        </div>
-        <div class="card-desc">Metrics collection across all Pi nodes. Tracks system and service health.</div>
-        <div class="card-links">
-          <a class="card-link" href="http://192.0.2.101:9090" target="_blank" data-url="http://192.0.2.101:9090">
-            Pi1 — 192.0.2.101:9090 <span class="link-dot checking"></span>
-          </a>
-          <a class="card-link" href="http://192.0.2.102:9090" target="_blank" data-url="http://192.0.2.102:9090">
-            Pi2 — 192.0.2.102:9090 <span class="link-dot checking"></span>
-          </a>
-          <a class="card-link" href="http://192.0.2.103:9090" target="_blank" data-url="http://192.0.2.103:9090">
-            Pi3 — 192.0.2.103:9090 <span class="link-dot checking"></span>
+
+      <!-- SIGNAL Data API -->
+      <div class="card-wrap">
+        <div class="card-inner">
+          <a class="card" href="http://192.0.2.99:8741" target="_blank" data-url="http://192.0.2.99:8741">
+            <div class="card-header">
+              <div class="card-title">Signal Data API</div>
+              <span class="status-dot checking"></span>
+            </div>
+            <div class="card-desc">Persistence layer for SIGNAL AI News.</div>
+            <div class="card-url">192.0.2.99:8741</div>
           </a>
         </div>
       </div>
+
+      <!-- Prometheus — multi-URL -->
+      <div class="card-wrap">
+        <div class="card-inner">
+          <div class="card-header">
+            <div class="card-title">Prometheus</div>
+            <span class="status-dot checking" id="dot-prometheus"></span>
+          </div>
+          <div class="card-desc">Metrics across all Pi nodes.</div>
+          <div class="card-links">
+            <a class="card-link" href="http://192.0.2.101:9090" target="_blank" data-url="http://192.0.2.101:9090" data-ping-url="http://192.0.2.101">
+              <span class="link-dot checking"></span>
+              <span class="link-label">Pi1 &#8212; 192.0.2.101:9090</span>
+            </a>
+            <a class="card-link" href="http://192.0.2.102:9090" target="_blank" data-url="http://192.0.2.102:9090" data-ping-url="http://192.0.2.102">
+              <span class="link-dot checking"></span>
+              <span class="link-label">Pi2 &#8212; 192.0.2.102:9090</span>
+            </a>
+            <a class="card-link" href="http://192.0.2.103:9090" target="_blank" data-url="http://192.0.2.103:9090" data-ping-url="http://192.0.2.103">
+              <span class="link-dot checking"></span>
+              <span class="link-label">Pi3 &#8212; 192.0.2.103:9090</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
     </div>
-  </div>
+  </section>
 
-  <div class="spacer"></div>
-</main>
+  <!-- ══════════════════════════════════
+       SECTOR 03 — OPENCLAW
+  ══════════════════════════════════ -->
+  <section class="sector">
+    <div class="sector-label">SECTOR 03</div>
+    <div class="sector-title-bar">
+      <span class="sector-bracket-left">[&#9552;&#9552;</span>
+      <span class="sector-name">OpenClaw</span>
+      <div class="sector-line"></div>
+      <span class="sector-bracket-right">&#9552;&#9552;]</span>
+    </div>
 
-<!-- Status bar -->
-<div class="status-bar">
-  <div class="sb-item">
-    <div class="sb-dot sb-up"></div>
-    <span class="sb-label" id="sb-up">0</span> <span>up</span>
+    <div class="card-grid">
+
+      <!-- OpenClaw Gateway — multi-URL -->
+      <div class="card-wrap">
+        <div class="card-inner">
+          <div class="card-header">
+            <div class="card-title">OpenClaw Gateway</div>
+            <span class="status-dot checking" id="dot-openclaw"></span>
+          </div>
+          <div class="card-desc">Agentic gateway on Pi nodes.</div>
+          <div class="card-links">
+            <a class="card-link" href="http://192.0.2.101:18789" target="_blank" data-url="http://192.0.2.101:18789">
+              <span class="link-dot checking"></span>
+              <span class="link-label">Pi1 &#8212; 192.0.2.101:18789</span>
+            </a>
+            <a class="card-link" href="http://192.0.2.102:18789" target="_blank" data-url="http://192.0.2.102:18789">
+              <span class="link-dot checking"></span>
+              <span class="link-label">Pi2 &#8212; 192.0.2.102:18789</span>
+            </a>
+            <a class="card-link" href="http://192.0.2.103:18789" target="_blank" data-url="http://192.0.2.103:18789">
+              <span class="link-dot checking"></span>
+              <span class="link-label">Pi3 &#8212; 192.0.2.103:18789</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mission Control — integrated page -->
+      <div class="card-wrap">
+        <div class="card-inner">
+          <a class="card" href="/mc/" data-url="/mc/api/agents">
+            <div class="card-header">
+              <div class="card-title">Mission Control</div>
+              <span class="status-dot checking"></span>
+            </div>
+            <div class="card-desc">Pi fleet ops — tasks, cron jobs, agent status, source intelligence.</div>
+            <div class="card-url">192.0.2.99:8090/mc/</div>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</div><!-- /#app -->
+
+<!-- ══ BOTTOM STATUS BAR ══ -->
+<div id="status-bar">
+  <div class="sb-segment">
+    <span class="sb-label">CONTACTS:</span>
+    <span class="sb-val-up" id="sb-up">0</span>
+    <span class="sb-label">ACTIVE</span>
   </div>
-  <div class="sb-item">
-    <div class="sb-dot sb-down"></div>
-    <span class="sb-label" id="sb-down">0</span> <span>down</span>
+  <div class="sb-segment">
+    <span class="sb-val-down" id="sb-down">0</span>
+    <span class="sb-label">OFFLINE</span>
   </div>
-  <div class="sb-item">
-    <div class="sb-dot sb-checking"></div>
-    <span class="sb-label" id="sb-checking">10</span> <span>checking</span>
+  <div class="sb-segment">
+    <span class="sb-val-check" id="sb-checking">0</span>
+    <span class="sb-label">SCANNING</span>
   </div>
-  <div style="flex:1"></div>
-  <span>LAST SWEEP: <span id="last-check" style="color:var(--text)">—</span></span>
-  <span>NEXT IN <span id="next-check" style="color:var(--acid)">30</span>s</span>
+  <div class="sb-spacer"></div>
+  <div class="sb-segment">
+    <span class="sb-label">LAST SWEEP:</span>
+    <span class="sb-val-time" id="last-check">--:--:--</span>
+  </div>
+  <div class="sb-segment">
+    <span class="sb-label">NEXT:</span>
+    <span class="sb-val-next" id="next-check">30</span>
+    <span class="sb-label">S</span>
+  </div>
 </div>
 
 <script>
-// ── Clock ──
 function tick() {
   const now = new Date();
   const h = String(now.getHours()).padStart(2,'0');
   const m = String(now.getMinutes()).padStart(2,'0');
   const s = String(now.getSeconds()).padStart(2,'0');
-  const colon = now.getMilliseconds() < 500 ? ':' : ' ';
+  const colon = now.getMilliseconds() < 500 ? ':' : '\u00a0';
   document.getElementById('clock').textContent = `${h}${colon}${m}${colon}${s}`;
 }
-setInterval(tick, 100);
-tick();
+setInterval(tick, 100); tick();
 
-// ── Bubbles ──
-const bubbleContainer = document.getElementById('bubbles');
-for (let i = 0; i < 18; i++) {
-  const b = document.createElement('div');
-  b.className = 'bubble';
-  const size = 3 + Math.random() * 6;
-  b.style.cssText = `
-    --dur: ${4 + Math.random() * 8}s;
-    --delay: ${Math.random() * 10}s;
-    --left: ${Math.random() * 100}%;
-    width: ${size}px;
-    height: ${size}px;
-  `;
-  bubbleContainer.appendChild(b);
-}
-
-// ── Status checking ──
-// Single-URL cards: <a class="card" data-url="...">
-// Multi-URL cards:  <div class="card"> with <a class="card-link" data-url="..."> children
 const singleCards = document.querySelectorAll('a.card[data-url]');
-const multiLinks  = document.querySelectorAll('.card-link[data-url]');
-const totalUrls   = singleCards.length + multiLinks.length;
-
+const totalUrls = singleCards.length + document.querySelectorAll('.card-link[data-url]').length;
 document.getElementById('total-count').textContent = totalUrls;
 document.getElementById('sb-checking').textContent = totalUrls;
 
-let upCount = 0, downCount = 0, countdown = 30;
+let upCount = 0, downCount = 0, countdown = 30, sweeping = false;
 
-async function ping(url) {
-  try {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 4000);
-    await fetch(url, { mode: 'no-cors', signal: ctrl.signal });
-    clearTimeout(t);
-    return 'up';
-  } catch(e) {
-    return 'down';
-  }
+async function pingHost(url) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 5000);
+  try { await fetch(url, { mode: 'no-cors', signal: ctrl.signal }); clearTimeout(t); return 'up'; }
+  catch(e) { clearTimeout(t); return e.name === 'AbortError' ? 'down' : 'up'; }
+}
+
+async function pingService(url) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 5000);
+  try { await fetch(url, { mode: 'no-cors', signal: ctrl.signal }); clearTimeout(t); return 'up'; }
+  catch(e) { clearTimeout(t); return 'down'; }
 }
 
 async function checkSingle(card) {
   const dot = card.querySelector('.status-dot');
   dot.className = 'status-dot checking';
-  const r = await ping(card.dataset.url);
-  dot.className = `status-dot ${r}`;
-  return r;
+  const r = await pingService(card.dataset.url);
+  dot.className = `status-dot ${r}`; return r;
 }
 
 async function checkLink(link) {
   const dot = link.querySelector('.link-dot');
   dot.className = 'link-dot checking';
-  const r = await ping(link.dataset.url);
-  dot.className = `link-dot ${r}`;
-  return r;
+  const r = link.dataset.pingUrl ? await pingHost(link.dataset.pingUrl) : await pingService(link.dataset.url);
+  dot.className = `link-dot ${r}`; return r;
 }
 
-// Update aggregate dot on a multi-card based on its child link results
 function updateAggregateDot(dotId, results) {
   const dot = document.getElementById(dotId);
-  if (!dot) return;
-  if (results.every(r => r === 'up'))   dot.className = 'status-dot up';
-  else if (results.some(r => r === 'up')) dot.className = 'status-dot checking'; // partial
-  else dot.className = 'status-dot down';
+  if (!dot || !results.length) return;
+  dot.className = results.every(r=>r==='up') ? 'status-dot up'
+    : results.some(r=>r==='up') ? 'status-dot checking'
+    : 'status-dot down';
+}
+
+function linksFor(dotId) {
+  const card = document.getElementById(dotId)?.closest('.card-inner');
+  return card ? [...card.querySelectorAll('.card-link[data-url]')] : [];
 }
 
 async function sweepAll() {
+  if (sweeping) return; sweeping = true; countdown = 30;
+
+  // Trigger scan line animation
+  const scanLine = document.getElementById('scan-line');
+  if (scanLine) { scanLine.classList.remove('scanning'); void scanLine.offsetWidth; scanLine.classList.add('scanning'); }
+
   upCount = 0; downCount = 0;
   document.getElementById('sb-checking').textContent = totalUrls;
   document.getElementById('sb-up').textContent = 0;
   document.getElementById('sb-down').textContent = 0;
 
-  // Check all in parallel
-  const [singleResults, signalResults, prometheusResults] = await Promise.all([
+  const [sr, sigR, promR, ocR] = await Promise.all([
     Promise.all([...singleCards].map(checkSingle)),
-    Promise.all([...document.querySelectorAll('.card-link[data-url]')].filter(l =>
-      l.closest('.card') === document.getElementById('dot-signal')?.closest('.card')
-    ).map(checkLink)),
-    Promise.all([...document.querySelectorAll('.card-link[data-url]')].filter(l =>
-      l.closest('.card') === document.getElementById('dot-prometheus')?.closest('.card')
-    ).map(checkLink)),
+    Promise.all(linksFor('dot-signal').map(checkLink)),
+    Promise.all(linksFor('dot-prometheus').map(checkLink)),
+    Promise.all(linksFor('dot-openclaw').map(checkLink)),
   ]);
 
-  updateAggregateDot('dot-signal', signalResults);
-  updateAggregateDot('dot-prometheus', prometheusResults);
+  updateAggregateDot('dot-signal', sigR);
+  updateAggregateDot('dot-prometheus', promR);
+  updateAggregateDot('dot-openclaw', ocR);
 
-  [...singleResults, ...signalResults, ...prometheusResults].forEach(r => {
-    if (r === 'up') upCount++; else downCount++;
-  });
-
+  [...sr,...sigR,...promR,...ocR].forEach(r => { if(r==='up') upCount++; else downCount++; });
   document.getElementById('sb-up').textContent = upCount;
   document.getElementById('sb-down').textContent = downCount;
   document.getElementById('sb-checking').textContent = 0;
@@ -800,14 +832,13 @@ async function sweepAll() {
   const now = new Date();
   document.getElementById('last-check').textContent =
     `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
-
-  countdown = 30;
+  sweeping = false;
 }
 
 setInterval(() => {
   countdown--;
-  if (countdown <= 0) sweepAll();
-  document.getElementById('next-check').textContent = Math.max(0, countdown);
+  if(countdown<=0 && !sweeping) sweepAll();
+  document.getElementById('next-check').textContent = Math.max(0,countdown);
 }, 1000);
 
 sweepAll();

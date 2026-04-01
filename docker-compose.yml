@@ -1,8 +1,32 @@
 services:
+  mc:
+    build: ../mission-control
+    expose:
+      - "8095"
+    volumes:
+      - ../mission-control/data:/app/data
+      - ~/.ssh:/root/.ssh:ro
+      - ~/.claude:/root/.claude
+      - ~/.claude.json:/root/.claude.json
+    environment:
+      OC_TOKEN: "REDACTED_OC_TOKEN"
+      SSH_USER: "jamil"
+      SSH_KEY_PATH: "/root/.ssh/id_ed25519"
+      PI1_HOST: "192.0.2.101"
+      PI2_HOST: "192.0.2.102"
+      PI3_HOST: "192.0.2.103"
+      PORT: "8095"
+      USE_WSL_SSH: "false"
+      BASE_PATH: "/mc"
+    restart: unless-stopped
+
   web:
     image: nginx:alpine
     ports:
       - "8090:80"
     volumes:
-      - ./index.html:/usr/share/nginx/html/index.html:ro
+      - ./:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - mc
     restart: unless-stopped
