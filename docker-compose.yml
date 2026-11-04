@@ -10,7 +10,7 @@ services:
       - ~/.claude.json:/root/.claude.json
     environment:
       OC_TOKEN: "${OC_TOKEN}"
-      SSH_USER: "jamil"
+      SSH_USER: "${SSH_USER:-user}"
       SSH_KEY_PATH: "/root/.ssh/id_ed25519"
       PI1_HOST: "192.0.2.101"
       PI2_HOST: "192.0.2.102"
